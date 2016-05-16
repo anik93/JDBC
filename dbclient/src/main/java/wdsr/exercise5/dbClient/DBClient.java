@@ -174,9 +174,9 @@ public class DBClient {
 	public void select1(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("SELECT pkey, name "
-														+ "FRoM Student "
-														+ "where pkey=(select e.fkey_student from Enrollment e)");
+			ResultSet resultSet = statement.executeQuery("SELECT s.pkey, s.name "
+														+ "FRoM Student s join Enrollment e on s.pkey=e.fkey_student"
+														+ "where e.fkey_student is null");
 			while(resultSet.next()){
 				log.info(resultSet.getInt("pkey")+ " " + resultSet.getString("name").split(" ")[1]);
 			}
@@ -201,9 +201,9 @@ public class DBClient {
 		try {
 			statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("SELECT s.pkey, s.name "
-														+ "FROM Student s join Enrollment e on s.pkey=e.fkey_student "
-																	   + "join Class c on e.fkey_class=c.pkey "
-														+ "where sex='female' and c.name='Existentialism in 20th century'");
+														+ "FROM Student s JOIN Enrollment e ON s.pkey=e.fkey_student "
+														+ "JOIN Class c ON e.fkey_class=c.pkey "
+														+ "WHERE sex='female' AND c.name='Existentialism in 20th century'");
 			while(resultSet.next()){
 				log.info(resultSet.getInt("pkey")+ " " + resultSet.getString("name").split(" ")[1]);
 			}
@@ -215,39 +215,44 @@ public class DBClient {
 	public void select4(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("");
+			ResultSet resultSet = statement.executeQuery("select f.name "
+														+ "from faculty f join class c on f.pkey=c.fkey_faculty "
+														+ "join enrollment e on c.pkey=e.fkey_class "
+														+ "group by f.name");
 			while(resultSet.next()){
-				log.info(resultSet.getInt("pkey")+ " " + resultSet.getString("name").split(" ")[1]);
+				log.info(resultSet.getString("name"));
 			}
 		} catch (SQLException e) {
 			log.error("Error Message ", e);
 		}
 	}
-	
+	//dobrze
 	public void select5(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("Select s.name, s.age "
-														+ "from student s join enrollment e on s.pkey=e.fkey_student "
-														+ "join class c on e.fkey=c.pkey "
-														+ "where s.age=(max(s1.age) from student)");
-			//while(resultSet.next()){
-				log.info(resultSet.getString("name").split(" ")[1]);
-			//}
+			ResultSet resultSet = statement.executeQuery("Select name, age "
+														+ "FROM student "
+														+ "where age=( select max(s1.age) "
+																		+ "FROM student s1 JOIN Enrollment e ON s1.pkey=e.fkey_student "
+																	    + "JOIN Class c ON e.fkey_class=c.pkey "
+																	    + "WHERE c.name='Introduction to labour law')");
+			while(resultSet.next()){
+				log.info(resultSet.getString("name")+" "+resultSet.getInt("age"));
+			}
 		} catch (SQLException e) {
 			log.error("Error Message ", e);
 		}
 	}
-	
+	//juz prawie
 	public void select6(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("SELECT count(s.pkey) "
+			ResultSet resultSet = statement.executeQuery("SELECT c.name, count(e.fkey_student) counter "
 														+ "FROM Student s join Enrollment e on s.pkey=e.fkey_student "
 														+ "join Class c on e.fkey_class=c.pkey "
-														+ "where count(s.pkey)>1");
+														+ "group by c.name ");
 			while(resultSet.next()){
-				log.info(resultSet.getString("counter"));
+				log.info(resultSet.getString("name")+" "+resultSet.getString("counter"));
 			}
 		} catch (SQLException e) {
 			log.error("Error Message ", e);
@@ -259,11 +264,20 @@ public class DBClient {
 			statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("SELECT level, avg(age) srednia "
 														+ "FROM Student "
-														+ "Group by level");
+														+ "GROUP BY level");
 			while(resultSet.next()){
 				log.info(resultSet.getString("level")+ " " + resultSet.getInt("srednia"));
 			}
 		} catch (SQLException e) {
+			log.error("Error Message ", e);
+		}
+	}
+	
+	public void closeConnection(){
+		try{
+			if(connection!=null)
+				connection.close();
+		}catch(SQLException e){
 			log.error("Error Message ", e);
 		}
 	}
