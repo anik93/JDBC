@@ -170,13 +170,13 @@ public class DBClient {
 			log.error("Error Message ", e);
 		}
 	}
-	
+	//dobrze
 	public void select1(){
 		try {
 			statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("SELECT s.pkey, s.name "
-														+ "FRoM Student s join Enrollment e on s.pkey=e.fkey_student"
-														+ "where e.fkey_student is null");
+														+ "FRoM Student s join Enrollment e on s.pkey=e.fkey_student "
+														+ "GROUP BY pkey, name");
 			while(resultSet.next()){
 				log.info(resultSet.getInt("pkey")+ " " + resultSet.getString("name").split(" ")[1]);
 			}
@@ -188,7 +188,9 @@ public class DBClient {
 	public void select2(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("");
+			ResultSet resultSet = statement.executeQuery("Select pkey, name "
+														+ "FROM student s left join Enrollment e ON s.pkey=e.fkey_student "
+														+ "where e.fkey_class is null");
 			while(resultSet.next()){
 				log.info(resultSet.getInt("pkey")+ " " + resultSet.getString("name").split(" ")[1]);
 			}
@@ -211,14 +213,14 @@ public class DBClient {
 			log.error("Error Message ", e);
 		}
 	}
-	
+	//dobrze
 	public void select4(){
 		try {
 			statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("select f.name "
 														+ "from faculty f join class c on f.pkey=c.fkey_faculty "
-														+ "join enrollment e on c.pkey=e.fkey_class "
-														+ "group by f.name");
+														+ "left join enrollment e on c.pkey=e.fkey_class "
+														+ "where e.fkey_student is null");
 			while(resultSet.next()){
 				log.info(resultSet.getString("name"));
 			}
@@ -230,29 +232,30 @@ public class DBClient {
 	public void select5(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("Select name, age "
+			ResultSet resultSet = statement.executeQuery("Select age "
 														+ "FROM student "
 														+ "where age=( select max(s1.age) "
 																		+ "FROM student s1 JOIN Enrollment e ON s1.pkey=e.fkey_student "
 																	    + "JOIN Class c ON e.fkey_class=c.pkey "
 																	    + "WHERE c.name='Introduction to labour law')");
 			while(resultSet.next()){
-				log.info(resultSet.getString("name")+" "+resultSet.getInt("age"));
+				log.info("{}",resultSet.getInt("age"));
 			}
 		} catch (SQLException e) {
 			log.error("Error Message ", e);
 		}
 	}
-	//juz prawie
+	//dobrze
 	public void select6(){
 		try {
 			statement = connection.createStatement();
-			ResultSet resultSet = statement.executeQuery("SELECT c.name, count(e.fkey_student) counter "
+			ResultSet resultSet = statement.executeQuery("SELECT c.name "
 														+ "FROM Student s join Enrollment e on s.pkey=e.fkey_student "
 														+ "join Class c on e.fkey_class=c.pkey "
-														+ "group by c.name ");
+														+ "group by c.name "
+														+ "having count(c.name)>1");
 			while(resultSet.next()){
-				log.info(resultSet.getString("name")+" "+resultSet.getString("counter"));
+				log.info(resultSet.getString("name"));
 			}
 		} catch (SQLException e) {
 			log.error("Error Message ", e);

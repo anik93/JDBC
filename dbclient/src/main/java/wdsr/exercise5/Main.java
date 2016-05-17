@@ -8,7 +8,7 @@ public class Main {
 		DBClient dbClient = new DBClient();
 		dbClient.createTabels();
 		dbClient.insertValues();
-		dbClient.select6();
+		dbClient.select5();
 		dbClient.closeConnection();
 	}
 
